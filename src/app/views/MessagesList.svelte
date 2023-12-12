@@ -16,7 +16,7 @@
   import {router} from "src/app/router"
 
   const activeTab =
-    window.location.pathname.slice(1) === "conversations" ? "conversations" : "requests"
+    window.location.pathname.slice(1) === "requests" ? "requests" : "conversations"
   const accepted = nip04Channels.derived(filter((c: Channel) => Boolean(c.last_sent)))
   const requests = nip04Channels.derived(filter((c: Channel) => !c.last_sent))
   const setActiveTab = tab => {
