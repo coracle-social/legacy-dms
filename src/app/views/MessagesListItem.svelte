@@ -3,15 +3,14 @@
   import PersonCircle from "src/app/shared/PersonCircle.svelte"
   import PersonAbout from "src/app/shared/PersonAbout.svelte"
   import Card from "src/partials/Card.svelte"
-  import {displayPubkey, hasNewMessages} from "src/engine"
+  import {channels, displayPubkey, hasNewMessages} from "src/engine"
   import {router} from "src/app/router"
 
   export let channel
 
-  const showAlert = hasNewMessages(channel)
-  const npub = nip19.npubEncode(channel.id)
+  const showAlert = channels.key(channel.id).derived(hasNewMessages)
 
-  const enter = () => router.at("conversations").of(npub).push()
+  const enter = () => router.at("conversations").of(nip19.npubEncode(channel.id)).push()
 </script>
 
 <Card interactive on:click={enter}>
@@ -24,8 +23,8 @@
           <h2 class="text-lg">{displayPubkey(channel.id)}</h2>
         </div>
         <div class="relative">
-          <i class="fa fa-bell" class:text-gray-5={!showAlert} />
-          {#if showAlert}
+          <i class="fa fa-bell" class:text-gray-5={!$showAlert} />
+          {#if $showAlert}
             <div class="absolute right-0 top-0 mt-1 h-1 w-1 rounded-full bg-accent" />
           {/if}
         </div>
