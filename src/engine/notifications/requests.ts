@@ -1,9 +1,8 @@
 import {now, Tags} from "paravel"
-import {seconds, batch, doPipe} from "hurdak"
-import {pluck, identity, max, slice, filter, without, sortBy} from "ramda"
+import {seconds, batch} from "hurdak"
+import {pluck, identity, max, without, sortBy} from "ramda"
 import {noteKinds, reactionKinds, getParentId} from "src/util/nostr"
 import type {Event} from "src/engine/events/model"
-import type {Filter} from "src/engine/network/model"
 import {EventKind} from "src/engine/events/model"
 import {env, sessions} from "src/engine/session/state"
 import {_events} from "src/engine/events/state"
@@ -81,35 +80,13 @@ export const loadNotifications = () => {
 
 export const listenForNotifications = async () => {
   const pubkeys = Object.keys(sessions.get())
-  const relays = mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read")))
-
-  const eventIds: string[] = doPipe(events.get(), [
-    filter((e: Event) => noteKinds.includes(e.kind)),
-    sortBy((e: Event) => -e.created_at),
-    slice(0, 256),
-    pluck("id"),
-  ])
-
-  const filters: Filter[] = [
-    // NIP04 Messages
-    {kinds: [4], "#p": pubkeys, limit: 1},
-    // NIP24 Messages
-    {kinds: [1059], "#p": pubkeys, limit: 1},
-    // Mentions
-    {kinds: noteKinds, "#p": pubkeys, limit: 1},
-  ]
-
-  // Replies
-  if (eventIds.length > 0) {
-    filters.push({kinds: noteKinds, "#e": eventIds, limit: 1})
-  }
 
   // Only grab one event from each category/relay so we have enough to show
   // the notification badges, but load the details lazily
   subscribePersistent({
-    relays,
-    filters,
     skipCache: true,
+    relays: mergeHints(pubkeys.map(pk => getPubkeyHints(pk, "read"))),
+    filters: [{kinds: [4], "#p": pubkeys, limit: 1}],
     onEvent: onNotificationEvent,
   })
 }

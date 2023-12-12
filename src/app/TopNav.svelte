@@ -19,22 +19,11 @@
   import {menuIsOpen} from "src/app/state"
   import {router} from "src/app/router"
   import type {Topic} from "src/engine"
-  import {
-    topics,
-    peopleWithName,
-    session,
-    canUseGiftWrap,
-    hasNewNip04Messages,
-    hasNewNip24Messages,
-    hasNewNotifications,
-    loadPeople,
-  } from "src/engine"
+  import {topics, peopleWithName, session, hasNewNip04Messages, loadPeople} from "src/engine"
 
   const logoUrl = import.meta.env.VITE_LOGO_URL || "/images/logo.png"
 
   const toggleMenu = () => menuIsOpen.update(x => !x)
-
-  $: hasNewDMs = $hasNewNip04Messages || ($canUseGiftWrap && $hasNewNip24Messages)
 
   let term = ""
   let searchIsOpen = false
@@ -101,11 +90,11 @@
     },
     {
       noTrailing: true,
-    }
+    },
   )
 
   const topicOptions = topics.derived(
-    map((topic: Topic) => ({type: "topic", id: topic.name, topic, text: "#" + topic.name}))
+    map((topic: Topic) => ({type: "topic", id: topic.name, topic, text: "#" + topic.name})),
   )
 
   const profileOptions = peopleWithName.derived($people =>
@@ -122,7 +111,7 @@
             "@" +
             [profile?.name, profile?.display_name, handle?.address].filter(identity).join(" "),
         }
-      })
+      }),
   )
 
   $: {
@@ -180,7 +169,7 @@
         class="w-10"
         title="png image from pngtree.com" /> -->
       <h1 class="staatliches pt-1 text-3xl">{appName}</h1>
-      {#if $hasNewNotifications || hasNewDMs}
+      {#if $hasNewNip04Messages}
         <div
           class="absolute left-8 top-4 h-2 w-2 rounded border border-solid border-white bg-accent" />
       {/if}
@@ -201,7 +190,7 @@
       "pr-16": $session,
       "pr-28": !$session,
       "z-40 pr-0": term,
-    }
+    },
   )}>
   <div
     class="pointer-events-auto relative z-10 cursor-pointer p-2"
@@ -221,7 +210,7 @@
       {
         "-mr-6 w-0 opacity-0": !searchIsOpen,
         "opacity-1 -ml-12 w-full pl-10 sm:-mr-1 sm:w-64": searchIsOpen,
-      }
+      },
     )} />
   <div
     class="pointer-events-auto cursor-pointer p-2 sm:block"
